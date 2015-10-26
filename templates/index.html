@@ -1,0 +1,143 @@
+{% extends '_base.html' %}
+{% block content %}
+<h1>Contact List</h1>
+<button id="newBtn" class="btn btn-primary">New</button>
+<table class="table">
+  <tr>
+    <th>Name</th>
+    <th>Phone</th>
+    <th>&nbsp;</th>
+  </tr>
+  {% for record in records %}
+  <tr>
+    <td>{{ record.name }}</td>
+    <td>{{ record.phone }}</td>
+    <td><button class="edit-btn btn btn-primary" data-id="{{ record.id }}">Edit</button>
+    <button class="del-btn btn btn-danger" data-id="{{ record.id }}">Delete</button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<div class="modal fade" id="crudModal" tabindex="-1" role="dialog" aria-labelledby="myCrudLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalLabel">Contact</h4>
+            </div>
+            <div id="modalBody" class="modal-body">
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+$(function() {
+    $('#newBtn').on('click', function() {
+      $.ajax({
+        url: "/add",
+        context: document.body
+      }).done(function(result) {
+        renderForm(result);
+      });
+      $('#modalLabel').html('New Contact');
+      $('#crudModal').modal('show');
+    });
+
+    $('.edit-btn').on('click', function() {
+      var id = $(this).attr('data-id');
+      $.ajax({
+        url: "/edit/"+id,
+        context: document.body
+      }).done(function(result) {
+        renderForm(result, id);
+      });
+      $('#modalLabel').html('Edit Contact');
+      $('#crudModal').modal('show');
+    });
+
+    $('.del-btn').on('click', function() {
+      var id = $(this).attr('data-id');
+      $.ajax({
+        url: "/delete/"+id,
+        method: "POST",
+        context: document.body
+      }).done(function(result) {
+        if(result == 'ok') {
+          location.reload();
+        }
+      });
+    });
+
+    function renderForm(result, id) {
+      $('#modalBody').html(result);
+      if(!id) {
+        $( "#crudForm" ).submit(function( event ) {
+          add({
+            csrf_token: $('#crudForm input#csrf_token').val(),
+            name: $('#crudForm input#name').val(),
+            phone: $('#crudForm input#phone').val()
+          });
+          event.preventDefault();
+        });    
+      } else {
+        $( "#crudForm" ).submit(function( event ) {
+          update(id, {
+            csrf_token: $('#crudForm input#csrf_token').val(),
+            name: $('#crudForm input#name').val(),
+            phone: $('#crudForm input#phone').val()
+          });
+          event.preventDefault();
+        });          
+      }
+    }
+
+    function add(data) {
+      console.log('add')
+      $.ajax({
+        url: "/add",
+        method: 'POST',
+        data: data,
+        context: document.body
+        }).done(function(result) {
+          if(result == 'ok') {
+            location.reload();
+          }
+          renderForm(result);
+        });
+      }
+
+     function update(id, data) {
+      $.ajax({
+        url: "/edit/"+id,
+        method: 'POST',
+        data: data,
+        context: document.body
+        }).done(function(result) {
+          if(result == 'ok') {
+            location.reload();
+          }
+          renderForm(result, id);
+        });
+      }
+
+     function del(id) {
+      $.ajax({
+        url: "/delete/"+id,
+        method: 'POST',
+        context: document.body
+        }).done(function(result) {
+          if(result == 'ok') {
+            location.reload();
+          }
+          renderForm(result, id);
+        });    
+      } 
+});
+</script>
+
+{% endblock %}

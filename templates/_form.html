@@ -1,0 +1,23 @@
+<form method="POST" id="crudForm" class="form-horizontal">
+  {% if form.errors %}
+  <ul>
+    {% for field, errors in form.errors.items(): %}
+    <li>{{ field }} {{ errors[0] }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {{form.hidden_tag()}}
+  <div class="form-group">
+      {{ form.name.label(class="col-md-2") }}
+      <div class="col-md-10">{{ form.name(class="form-control") }}</div>
+  </div>
+  <div class="form-group">
+      {{ form.phone.label(class="col-md-2") }}
+      <div class="col-md-10">{{ form.phone(class="form-control") }}</div>
+  </div>
+  <div class="form-group">
+    <div class="col-md-10">
+      <button class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</form>
